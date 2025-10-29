@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +38,15 @@ public class StudentAdapter  extends RecyclerView.Adapter<StudentAdapter.ViewHol
         this.context = context;
         this.students = students;
         this.listener = listener;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
+        notifyDataSetChanged();
+    }
+
+    public List<Student> getStudents() {
+        return students;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

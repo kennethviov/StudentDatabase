@@ -1,8 +1,12 @@
 package com.violetfruit.studentdatabase;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.SearchView;
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
     StudentAdapter adapter;
     List<Student> students;
     Intent intent;
+    private SearchView searchView;
 
 
     @Override
@@ -60,11 +65,52 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
         ImageButton btnAdd = findViewById(R.id.btnAdd);
-        SearchView searchView = findViewById(R.id.searchView);
+        searchView = findViewById(R.id.searchView);
 
         btnAdd.setOnClickListener(v -> {
             startActivityForResult(new Intent(MainActivity.this, MainActivity2.class), 1);
         });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (searchView.findFocus() != null) {
+                Rect searchViewRect = new Rect();
+                searchView.getGlobalVisibleRect(searchViewRect);
+                if (!searchViewRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    searchView.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+                    }
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
+    private void filter(String text) {
+        List<Student> filteredList = new ArrayList<>();
+        for (Student student : students) {
+            if (student.name.toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(student);
+            }
+        }
+        adapter.setStudents(filteredList);
     }
 
     private void refreshStudentList() {
@@ -120,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
         popup.getMenuInflater().inflate(R.menu.context_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.actionEdit) {
+                Toast.makeText(this, "Edit " + students.get(position).name, Toast.LENGTH_SHORT).show();
                 Bundle bundle = new Bundle();
 
                 bundle.putInt("id", students.get(position).getId());
@@ -133,7 +180,8 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
 
                 return true;
             } else if (item.getItemId() == R.id.actionDelete) {
-                Toast.makeText(this, "Delete " + students.get(position).name, Toast.LENGTH_SHORT).show();
+                // Toast.makeText(this, "Delete " + students.get(position).name, Toast.LENGTH_SHORT).show();
+                Snackbar.make(recyclerView, "Delete " + students.get(position).name, Snackbar.LENGTH_LONG).show();
 
                 int deleted = dbHelper.deleteStudent(students.get(position).getId());
 
@@ -170,8 +218,12 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
             if (isUpdate) {
                 student.setId(id);
                 dbHelper.updateStudent(student);
+                // Toast.makeText(this, "Updated " + student.name, Toast.LENGTH_SHORT).show();
+                Snackbar.make(recyclerView, "Updated " + student.name, Snackbar.LENGTH_SHORT).show();
             } else {
                 dbHelper.addStudent(student);
+                // Toast.makeText(this, "Added " + student.name, Toast.LENGTH_SHORT).show();
+                Snackbar.make(recyclerView, "Added " + student.name, Snackbar.LENGTH_SHORT).show();
             }
             refreshStudentList();
         }
