@@ -18,7 +18,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.snackbar.Snackbar;
+
 public class MainActivity2 extends AppCompatActivity {
+
+    private Uri selectedImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,61 +43,39 @@ public class MainActivity2 extends AppCompatActivity {
         Button btnSave = findViewById(R.id.btnSave);
         Button btnCancel = findViewById(R.id.btnCancel);
 
-        /*
-        *
-        * Image Picker
-        *
-        *
-        * */
         imgPicker.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK);
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("image/*");
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(intent, 100);
         });
 
-
-        /*
-        *
-        * Spinner
-        *
-        * */
         String[] courses = {"Choose course", "BSCS", "BSIT", "BSEMC", "BSIS", "BSHM"};
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
                 courses
         );
-
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
         spnrCourse.setAdapter(adapter);
 
         spnrCourse.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedCourse = parent.getItemAtPosition(position).toString();
-                Toast.makeText(MainActivity2.this, "Selected: " + selectedCourse, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Handle nothing selected
             }
         });
 
-
-
-        /*
-         *
-         * IF EDIT / UPDATE
-         *
-         * */
         int toUpdateStudent;
         Bundle bundle = getIntent().getExtras();
 
         if (bundle != null) {
-
             toUpdateStudent = bundle.getInt("id");
             String name = bundle.getString("name");
             String course = bundle.getString("course");
@@ -104,7 +86,8 @@ public class MainActivity2 extends AppCompatActivity {
             spnrCourse.setSelection(adapter.getPosition(course));
 
             if (uri != null) {
-                imgPicker.setImageURI(Uri.parse(uri));
+                selectedImageUri = Uri.parse(uri);
+                imgPicker.setImageURI(selectedImageUri);
             } else {
                 imgPicker.setImageResource(img);
             }
@@ -115,16 +98,9 @@ public class MainActivity2 extends AppCompatActivity {
             isUpdate = false;
         }
 
-        /*
-        *
-        * Save Button
-        *
-        * */
         btnSave.setOnClickListener(v -> {
             String name = editName.getText().toString().trim();
             String course = spnrCourse.getSelectedItem().toString().trim();
-            int avatarRes = imgPicker.getDrawable() != null ? R.drawable.baseline_person_24 : 0;
-            String avatarUri = imgPicker.getDrawable() != null ? imgPicker.getDrawable().toString() : "";
 
             if (name.isEmpty()) {
                 editName.setError("Name is required");
@@ -132,31 +108,27 @@ public class MainActivity2 extends AppCompatActivity {
                 return;
             }
             if (spnrCourse.getSelectedItemPosition() == 0) {
-                Toast.makeText(MainActivity2.this, "Please select a course", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity2.this, "Please select a course", Toast.LENGTH_SHORT).show();
+                Snackbar.make(v, "Please select a course", Snackbar.LENGTH_SHORT).show();
                 return;
             }
 
-            Intent intent = new Intent();
-            Bundle bundle1 = new Bundle();
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("isUpdate", isUpdate);
+            resultIntent.putExtra("id", toUpdateStudent);
+            resultIntent.putExtra("name", name);
+            resultIntent.putExtra("course", course);
 
-            assert bundle != null;
-            bundle.putBoolean("isUpdate", isUpdate);
-            bundle.putInt("id", toUpdateStudent);
-            bundle.putString("name", name);
-            bundle.putString("course", course);
-            bundle.putInt("imageRes", avatarRes);
-            bundle.putString("imageUri", avatarUri);
+            if (selectedImageUri != null) {
+                resultIntent.putExtra("imageUri", selectedImageUri.toString());
+            } else {
+                resultIntent.putExtra("imageRes", R.drawable.baseline_person_24);
+            }
 
-            intent.putExtras(bundle1);
-            setResult(RESULT_OK, intent);
+            setResult(RESULT_OK, resultIntent);
             finish();
         });
 
-        /*
-        *
-        * Cancel Button
-        *
-        * */
         btnCancel.setOnClickListener(v -> {
             finish();
         });
@@ -167,9 +139,21 @@ public class MainActivity2 extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
-            Uri imageUri = data.getData();
-            ImageView imgPicker = findViewById(R.id.imgPicker);
-            imgPicker.setImageURI(imageUri);
+            Uri uri = data.getData();
+            if (uri != null) {
+                final int takeFlags = data.getFlags() &
+                        (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                try {
+                    getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (SecurityException e) {
+                    // handle or log; fallback is to copy the file into app storage
+                    e.printStackTrace();
+                }
+
+                selectedImageUri = uri;
+                ImageView imgPicker = findViewById(R.id.imgPicker);
+                imgPicker.setImageURI(selectedImageUri);
+            }
         }
     }
 }

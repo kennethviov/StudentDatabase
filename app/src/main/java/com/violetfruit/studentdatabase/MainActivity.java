@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,10 +51,6 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
         recyclerView = findViewById(R.id.recyclerView1);
 
         students = dbHelper.getAllStudents();
-//        students.add(new Student("Alpha", "BSCS", R.drawable.baseline_person_24, null));
-//        students.add(new Student("Bravo", "BSIT", R.drawable.baseline_person_24, null));
-//        students.get(0).setId(1001);
-//        students.get(1).setId(1002);
 
         adapter = new StudentAdapter(this, students, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -65,9 +63,14 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
         SearchView searchView = findViewById(R.id.searchView);
 
         btnAdd.setOnClickListener(v -> {
-            // Handle add button click
-            startActivityForResult(intent, 1);
+            startActivityForResult(new Intent(MainActivity.this, MainActivity2.class), 1);
         });
+    }
+
+    private void refreshStudentList() {
+        students.clear();
+        students.addAll(dbHelper.getAllStudents());
+        adapter.notifyDataSetChanged();
     }
 
     @NonNull
@@ -108,9 +111,7 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
             }
         };
 
-        // Attach helper
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
-        return itemTouchHelper;
+        return new ItemTouchHelper(callback);
     }
 
     @Override
@@ -119,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
         popup.getMenuInflater().inflate(R.menu.context_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.actionEdit) {
-                Toast.makeText(this, "Edit " + students.get(position).name, Toast.LENGTH_SHORT).show();
                 Bundle bundle = new Bundle();
 
                 bundle.putInt("id", students.get(position).getId());
@@ -135,11 +135,15 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
             } else if (item.getItemId() == R.id.actionDelete) {
                 Toast.makeText(this, "Delete " + students.get(position).name, Toast.LENGTH_SHORT).show();
 
-                ///  TODO: Implement delete logic
+                int deleted = dbHelper.deleteStudent(students.get(position).getId());
+
+                if (deleted < 0) {
+                    Snackbar.make(recyclerView, "Error deleting student", Snackbar.LENGTH_SHORT).show();
+                    return false;
+                }
 
                 students.remove(position);
                 adapter.notifyItemRemoved(position);
-
                 return true;
             }
             return false;
@@ -148,13 +152,12 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
     }
 
     @Override
-    public void onAcvityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             Bundle bundle = data.getExtras();
 
-            assert bundle != null;
             boolean isUpdate = bundle.getBoolean("isUpdate", false);
             int id = bundle.getInt("id");
             String name = bundle.getString("name");
@@ -162,17 +165,19 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
             int imageRes = bundle.getInt("imageRes");
             String imageUri = bundle.getString("imageUri");
 
-            ///  TODO: Add UI update logic
+            Student student = new Student(name, course, imageRes, imageUri);
 
             if (isUpdate) {
-                dbHelper.updateStudent(id, new Student(name, course, imageRes, imageUri));
+                student.setId(id);
+                dbHelper.updateStudent(student);
             } else {
-                dbHelper.addStudent(new Student(name, course, imageRes, imageUri));
+                dbHelper.addStudent(student);
             }
+            refreshStudentList();
         }
     }
 
     public void onItemClicked(int position) {
-        Toast.makeText(this, "Clicked " + students.get(position).name, Toast.LENGTH_SHORT).show();
+
     }
 }

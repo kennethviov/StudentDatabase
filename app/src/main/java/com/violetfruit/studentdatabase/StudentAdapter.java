@@ -2,6 +2,7 @@ package com.violetfruit.studentdatabase;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,7 @@ public class StudentAdapter  extends RecyclerView.Adapter<StudentAdapter.ViewHol
     public interface OnItemActionListener {
         void onMenuClicked(View anchor, int position);
 
-        void onAcvityResult(int requestCode, int resultCode, @Nullable Intent data);
+        void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
 
         void onItemClicked(int position);
 
@@ -52,7 +53,17 @@ public class StudentAdapter  extends RecyclerView.Adapter<StudentAdapter.ViewHol
         }
 
         public void bind(Student student) {
-            imgAvatar.setImageResource(student.avatarResId);
+            if (student.avatarUri != null && !student.avatarUri.isEmpty()) {
+                try {
+                    Uri uri = Uri.parse(student.avatarUri);
+                    imgAvatar.setImageURI(uri);
+                } catch (Exception e) {
+                    imgAvatar.setImageResource(student.avatarResId);
+                }
+            } else {
+                imgAvatar.setImageResource(student.avatarResId);
+            }
+
             txtName.setText(student.name);
             txtCourse.setText(student.course);
         }

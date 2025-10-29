@@ -33,7 +33,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_NAME + " TEXT, " +
                 COLUMN_COURSE + " TEXT, " +
-                COLUMN_AVATAR_RES_ID + " TEXT, " +
+                COLUMN_AVATAR_RES_ID + " INTEGER, " +
                 COLUMN_AVATAR_URI + " TEXT)";
         db.execSQL(createTableQuery);
 
@@ -85,7 +85,7 @@ public class DBHelper extends SQLiteOpenHelper {
             student.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)));
 
             cursor.close();
-            //db.close();
+            db.close();
             return student;
         }
 
@@ -118,7 +118,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // update
-    public int updateStudent(int id, Student student) {
+    public int updateStudent(Student student) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -127,7 +127,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_AVATAR_RES_ID, student.avatarResId);
         values.put(COLUMN_AVATAR_URI, student.avatarUri);
 
-        int rows = db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+        int rows = db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{String.valueOf(student.getId())});
         //db.close();
         return rows;
     }

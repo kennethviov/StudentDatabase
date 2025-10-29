@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:text="Viovicente, Kenneth Reniel C."
-            android:textColor="@color/black"
+            android:textColor="@color/onPrimary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
