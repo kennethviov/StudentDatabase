@@ -137,9 +137,16 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
+                int position = viewHolder.getBindingAdapterPosition();
+
+                Student removedStudent = students.get(position);
+
                 adapter.removeItem(position);
-                Toast.makeText(getApplicationContext(), "Item removed!", Toast.LENGTH_SHORT).show();
+
+                dbHelper.deleteStudent(removedStudent.getId());
+
+                //Toast.makeText(getApplicationContext(), "Item removed!", Toast.LENGTH_SHORT).show();
+                Snackbar.make(recyclerView, "Item removed!", Snackbar.LENGTH_SHORT).show();
             }
 
             @Override
@@ -166,7 +173,9 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
         popup.getMenuInflater().inflate(R.menu.context_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.actionEdit) {
-                Toast.makeText(this, "Edit " + students.get(position).name, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Edit " + students.get(position).name, Toast.LENGTH_SHORT).show();
+                Snackbar.make(recyclerView, "Edit " + students.get(position).name, Snackbar.LENGTH_SHORT).show();
+
                 Bundle bundle = new Bundle();
 
                 bundle.putInt("id", students.get(position).getId());
@@ -190,8 +199,7 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
                     return false;
                 }
 
-                students.remove(position);
-                adapter.notifyItemRemoved(position);
+                adapter.removeItem(position);
                 return true;
             }
             return false;
