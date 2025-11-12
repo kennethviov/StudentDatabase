@@ -23,8 +23,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.snackbar.Snackbar;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,8 +143,7 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
 
                 dbHelper.deleteStudent(removedStudent.getId());
 
-                //Toast.makeText(getApplicationContext(), "Item removed!", Toast.LENGTH_SHORT).show();
-                Snackbar.make(recyclerView, "Item removed!", Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Item removed!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -173,8 +170,7 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
         popup.getMenuInflater().inflate(R.menu.context_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.actionEdit) {
-                //Toast.makeText(this, "Edit " + students.get(position).name, Toast.LENGTH_SHORT).show();
-                Snackbar.make(recyclerView, "Edit " + students.get(position).name, Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(this, "Edit " + students.get(position).name, Toast.LENGTH_SHORT).show();
 
                 Bundle bundle = new Bundle();
 
@@ -189,13 +185,12 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
 
                 return true;
             } else if (item.getItemId() == R.id.actionDelete) {
-                // Toast.makeText(this, "Delete " + students.get(position).name, Toast.LENGTH_SHORT).show();
-                Snackbar.make(recyclerView, "Delete " + students.get(position).name, Snackbar.LENGTH_LONG).show();
+                Toast.makeText(this, "Delete " + students.get(position).name, Toast.LENGTH_SHORT).show();
 
                 int deleted = dbHelper.deleteStudent(students.get(position).getId());
 
                 if (deleted < 0) {
-                    Snackbar.make(recyclerView, "Error deleting student", Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error deleting student ", Toast.LENGTH_SHORT).show();
                     return false;
                 }
 
@@ -226,12 +221,10 @@ public class MainActivity extends AppCompatActivity implements StudentAdapter.On
             if (isUpdate) {
                 student.setId(id);
                 dbHelper.updateStudent(student);
-                // Toast.makeText(this, "Updated " + student.name, Toast.LENGTH_SHORT).show();
-                Snackbar.make(recyclerView, "Updated " + student.name, Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(this, "Updated " + student.name, Toast.LENGTH_SHORT).show();
             } else {
                 dbHelper.addStudent(student);
-                // Toast.makeText(this, "Added " + student.name, Toast.LENGTH_SHORT).show();
-                Snackbar.make(recyclerView, "Added " + student.name, Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(this, "Added " + student.name, Toast.LENGTH_SHORT).show();
             }
             refreshStudentList();
         }

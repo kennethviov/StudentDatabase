@@ -61,7 +61,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_AVATAR_URI, student.avatarUri);
 
         long id = db.insert(TABLE_NAME, null, values);
-        //db.close();
+        db.close();
         return id;
     }
 
@@ -89,7 +89,7 @@ public class DBHelper extends SQLiteOpenHelper {
             return student;
         }
 
-        //db.close();
+        db.close();
         return null;
     }
 
@@ -113,7 +113,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        //db.close();
+        db.close();
         return students;
     }
 
@@ -128,7 +128,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_AVATAR_URI, student.avatarUri);
 
         int rows = db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{String.valueOf(student.getId())});
-        //db.close();
+        db.close();
         return rows;
     }
 
@@ -136,7 +136,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public int deleteStudent(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         int rows = db.delete(TABLE_NAME, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
-        //db.close();
+        db.close();
         return rows;
     }
 }

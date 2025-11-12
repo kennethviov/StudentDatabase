@@ -22,8 +22,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.snackbar.Snackbar;
-
 public class MainActivity2 extends AppCompatActivity {
 
     private Uri selectedImageUri;
@@ -112,8 +110,7 @@ public class MainActivity2 extends AppCompatActivity {
                 return;
             }
             if (spnrCourse.getSelectedItemPosition() == 0) {
-//                Toast.makeText(MainActivity2.this, "Please select a course", Toast.LENGTH_SHORT).show();
-                Snackbar.make(v, "Please select a course", Snackbar.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity2.this, "Please select a course", Toast.LENGTH_SHORT).show();
                 return;
             }
 
