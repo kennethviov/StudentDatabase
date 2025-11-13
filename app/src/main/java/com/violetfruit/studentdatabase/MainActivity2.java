@@ -113,18 +113,17 @@ public class MainActivity2 extends AppCompatActivity {
                 Toast.makeText(MainActivity2.this, "Please select a course", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (selectedImageUri == null) {
+                Toast.makeText(MainActivity2.this, "Please select an image", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             Intent resultIntent = new Intent();
             resultIntent.putExtra("isUpdate", isUpdate);
             resultIntent.putExtra("id", toUpdateStudent);
             resultIntent.putExtra("name", name);
             resultIntent.putExtra("course", course);
-
-            if (selectedImageUri != null) {
-                resultIntent.putExtra("imageUri", selectedImageUri.toString());
-            } else {
-                resultIntent.putExtra("imageRes", R.drawable.baseline_person_24);
-            }
+            resultIntent.putExtra("imageUri", selectedImageUri.toString());
 
             setResult(RESULT_OK, resultIntent);
             finish();
